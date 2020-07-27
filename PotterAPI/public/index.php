@@ -23,11 +23,13 @@
 </form>
 <?php
 /**
- * Simple Script to fetch data from
- * the PotterAPI
- *
+ * Simple Script to fetch data from the PotterAPI using the character endpoint, 
+ * target the character by house, and search partial match.
+ * Author: Joseph Fletcher
  */
-require '../configuration.php';
+require '../configuration.php'; //get the api key from config file
+
+//initialize curl and set headers to fetch data into variable response
 $curl = curl_init();
 curl_setopt_array($curl, array(
     CURLOPT_URL => 'https://www.potterapi.com/v1/characters/?key=' . $key,
@@ -46,8 +48,11 @@ curl_setopt_array($curl, array(
 $response = curl_exec($curl);
 
 curl_close($curl);
+
+/decode json data as object
 $character = json_decode($response);
 
+//check for search params on submit
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['search'])) {
         $search = $_POST['search'];
@@ -63,7 +68,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo '<p>' . $val->species . '</p></div>';
             }
         }
-    } elseif (isset($_POST['house'])) {
+    } 
+    //check for characters house affiliation on submit
+    elseif (isset($_POST['house'])) {
         foreach ($character as $key => $val) {
             $house= $_POST['house'];
             if (isset($val->house) && $val->house == $house ) {
@@ -76,6 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 } else {
+    //on initial load display all data
     foreach ($character as $key => $val) {
         echo '<div style="float:left; width:25%; padding: 5px;"><h3>' . $val->name . '</h3>';
         if (isset($val->house)) {
